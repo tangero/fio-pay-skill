@@ -1,6 +1,6 @@
 #!/bin/bash
-# FIO Pay Skill installer for Claude Code
-# Usage: ./install.sh  or  curl -fsSL <url>/install.sh | bash
+# FIO Pay Skill instalátor pro Claude Code
+# Použití: ./install.sh  nebo  curl -fsSL <url>/install.sh | bash
 
 set -e
 
@@ -8,29 +8,29 @@ COMMANDS_DIR="$HOME/.claude/commands"
 SKILL_FILE="fio-setup.md"
 REPO_URL="https://raw.githubusercontent.com/tangero/fio-pay-skill/main"
 
-echo "🏦 Installing FIO Pay Skill for Claude Code..."
+echo "🏦 Instaluji FIO Pay Skill pro Claude Code..."
 
-# Create commands directory
+# Vytvoření adresáře pro commands
 mkdir -p "$COMMANDS_DIR"
 
-# Determine source: local file (git clone) or remote (curl pipe)
+# Zjištění zdroje: lokální soubor (git clone) nebo vzdálený (curl pipe)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null || echo ".")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/$SKILL_FILE" ]; then
-  # Local install (git clone)
+  # Lokální instalace (git clone)
   cp "$SCRIPT_DIR/$SKILL_FILE" "$COMMANDS_DIR/$SKILL_FILE"
-  echo "✅ Installed from local file"
+  echo "✅ Nainstalováno z lokálního souboru"
 else
-  # Remote install (curl)
+  # Vzdálená instalace (curl)
   curl -fsSL "$REPO_URL/$SKILL_FILE" -o "$COMMANDS_DIR/$SKILL_FILE"
-  echo "✅ Downloaded from GitHub"
+  echo "✅ Staženo z GitHubu"
 fi
 
 echo ""
-echo "✅ FIO Pay Skill installed successfully!"
+echo "✅ FIO Pay Skill úspěšně nainstalován!"
 echo ""
-echo "   Location: $COMMANDS_DIR/$SKILL_FILE"
+echo "   Umístění: $COMMANDS_DIR/$SKILL_FILE"
 echo ""
-echo "   Usage: Open any project in Claude Code and type:"
+echo "   Použití: Otevřete jakýkoliv projekt v Claude Code a napište:"
 echo "   /fio-setup"
 echo ""

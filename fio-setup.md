@@ -1,81 +1,81 @@
-# FIO Bank Payment Integration Setup
+# Nastavení platební integrace FIO Banky
 
-You are setting up a complete FIO Bank payment integration in the current project. Follow these steps precisely.
+Nastavuješ kompletní platební integraci FIO Banky v aktuálním projektu. Postupuj přesně podle těchto kroků.
 
-## Step 1: Analyze the current project
+## Krok 1: Analyzuj aktuální projekt
 
-Read `package.json` (or equivalent) and determine:
+Přečti `package.json` (nebo ekvivalent) a zjisti:
 
-1. **Backend framework**: Cloudflare Pages Functions / Next.js / Express / Hono / other
+1. **Backend framework**: Cloudflare Pages Functions / Next.js / Express / Hono / jiný
 2. **Frontend framework**: React / Vue / Svelte / vanilla
-3. **UI library**: shadcn/ui / MUI / Chakra / Ant Design / none
-4. **Test framework**: Vitest / Jest / none
+3. **UI knihovna**: shadcn/ui / MUI / Chakra / Ant Design / žádná
+4. **Testovací framework**: Vitest / Jest / žádný
 5. **Storage**: Cloudflare KV / SQLite / Prisma / Redis / filesystem
-6. **Directory structure**: where API routes live, where components live, where tests live
+6. **Adresářová struktura**: kde žijí API routes, komponenty, testy
 
-Report your findings to the user before generating code. Ask if they want:
-- **Payment verification only** (basic)
-- **Payment + donations** (full)
+Své zjištění nahlás uživateli před generováním kódu. Zeptej se, zda chce:
+- **Pouze ověření plateb** (základní)
+- **Platby + dary** (kompletní)
 
-## Step 2: Generate files
+## Krok 2: Vygeneruj soubory
 
-Adapt the reference implementation below to the detected stack. Key adaptations:
+Přizpůsob referenční implementaci níže detekovanému stacku. Klíčové adaptace:
 
-### Backend adaptation rules
+### Pravidla adaptace backendu
 
-| Stack | API handler signature | Storage calls |
+| Stack | Signatura API handleru | Volání storage |
 |-------|----------------------|---------------|
 | **Cloudflare Pages Functions** | `export const onRequestPost: PagesFunction<Env>` | `env.KV_NAMESPACE.get/put` |
-| **Next.js App Router** | `export async function POST(request: Request)` | Use your DB/KV adapter |
-| **Next.js Pages Router** | `export default async function handler(req, res)` | Use your DB/KV adapter |
-| **Express** | `router.post('/path', async (req, res) => {})` | Use your DB/storage adapter |
-| **Hono** | `app.post('/path', async (c) => {})` | Use your DB/storage adapter |
+| **Next.js App Router** | `export async function POST(request: Request)` | Použij DB/KV adaptér projektu |
+| **Next.js Pages Router** | `export default async function handler(req, res)` | Použij DB/KV adaptér projektu |
+| **Express** | `router.post('/path', async (req, res) => {})` | Použij DB/storage adaptér projektu |
+| **Hono** | `app.post('/path', async (c) => {})` | Použij DB/storage adaptér projektu |
 
-### Frontend adaptation rules
+### Pravidla adaptace frontendu
 
-| UI Library | Component style |
+| UI knihovna | Styl komponenty |
 |------------|----------------|
-| **shadcn/ui** | Use `Card`, `Button`, `cn()` from `@/components/ui/*` |
-| **MUI** | Use `Card`, `Button`, `Typography` from `@mui/material` |
-| **Plain React** | Use basic HTML elements with inline styles or CSS modules |
-| **Vanilla** | Generate plain HTML + JS (no JSX) |
+| **shadcn/ui** | Použij `Card`, `Button`, `cn()` z `@/components/ui/*` |
+| **MUI** | Použij `Card`, `Button`, `Typography` z `@mui/material` |
+| **Plain React** | Použij základní HTML elementy s inline styly nebo CSS moduly |
+| **Vanilla** | Vygeneruj plain HTML + JS (bez JSX) |
 
-### Storage adaptation rules
+### Pravidla adaptace storage
 
-For non-KV storage, replace `env.WORKSHOP_DATA.get(key, 'json')` / `env.WORKSHOP_DATA.put(key, JSON.stringify(data))` with the project's storage pattern. The keys to store:
+Pro ne-KV storage nahraď `env.WORKSHOP_DATA.get(key, 'json')` / `env.WORKSHOP_DATA.put(key, JSON.stringify(data))` storage vzorem projektu. Klíče k uložení:
 - `payment:{identifier}` — PaymentRecord JSON
 - `donation:{eventId}` — DonationRecord JSON
-- `fio:last_check` — timestamp string for rate limiting
+- `fio:last_check` — timestamp string pro rate limiting
 
 ---
 
-## Reference Implementation
+## Referenční implementace
 
-### File 1: Payment Utilities (pure functions, no framework dependencies)
+### Soubor 1: Platební utility (čisté funkce bez závislostí na frameworku)
 
-**Target path:** `{api-dir}/fio/payment-utils.ts` (or `_payment-utils.ts` for Cloudflare)
+**Cílová cesta:** `{api-dir}/fio/payment-utils.ts` (nebo `_payment-utils.ts` pro Cloudflare)
 
 ```typescript
-// Pure utility functions for FIO Bank payment integration
-// No framework dependencies — works with any backend
+// Čisté utility funkce pro platební integraci FIO Banky
+// Žádné závislosti na frameworku — funguje s jakýmkoliv backendem
 
 // ============================================================
-// Types
+// Typy
 // ============================================================
 
-/** FIO Bank API transaction structure (JSON format v1.9) */
+/** Struktura transakce FIO Bank API (JSON formát v1.9) */
 export interface FioTransaction {
-  column0: { value: string; name: string; id: number } | null;   // Date
-  column1: { value: number; name: string; id: number } | null;   // Volume
-  column2: { value: string; name: string; id: number } | null;   // Counter account
-  column5: { value: string; name: string; id: number } | null;   // Variable symbol
-  column10: { value: string; name: string; id: number } | null;  // Counter account name
-  column14: { value: string; name: string; id: number } | null;  // Currency
-  column16: { value: string; name: string; id: number } | null;  // Message for recipient
-  column22: { value: number; name: string; id: number } | null;  // Transaction ID
+  column0: { value: string; name: string; id: number } | null;   // Datum
+  column1: { value: number; name: string; id: number } | null;   // Objem
+  column2: { value: string; name: string; id: number } | null;   // Protiúčet
+  column5: { value: string; name: string; id: number } | null;   // Variabilní symbol
+  column10: { value: string; name: string; id: number } | null;  // Název protiúčtu
+  column14: { value: string; name: string; id: number } | null;  // Měna
+  column16: { value: string; name: string; id: number } | null;  // Zpráva pro příjemce
+  column22: { value: number; name: string; id: number } | null;  // ID pohybu
 }
 
-/** FIO API JSON response structure */
+/** Struktura JSON odpovědi FIO API */
 export interface FioApiResponse {
   accountStatement: {
     info: {
@@ -98,7 +98,7 @@ export interface FioApiResponse {
   };
 }
 
-/** Payment record stored in KV/DB */
+/** Záznam o platbě uložený v KV/DB */
 export interface PaymentRecord {
   status: 'pending' | 'paid';
   evaluationsUsed: number;
@@ -116,7 +116,7 @@ export interface PaymentRecord {
   }>;
 }
 
-/** Payment match result */
+/** Výsledek párování platby */
 export interface PaymentMatchResult {
   found: boolean;
   transaction?: {
@@ -127,7 +127,7 @@ export interface PaymentMatchResult {
   };
 }
 
-/** Donation record stored in KV/DB */
+/** Záznam o daru uložený v KV/DB */
 export interface DonationRecord {
   variableSymbol: string;
   eventId: string;
@@ -141,23 +141,23 @@ export interface DonationRecord {
 }
 
 // ============================================================
-// Functions
+// Funkce
 // ============================================================
 
-/** Generates an 8-digit random variable symbol (10000000–99999999) */
+/** Generuje 8místný náhodný variabilní symbol (10000000–99999999) */
 export function generateVariableSymbol(): string {
   return String(Math.floor(10000000 + Math.random() * 90000000));
 }
 
-/** Validates variable symbol format */
+/** Validuje formát variabilního symbolu */
 export function isValidVariableSymbol(vs: string): boolean {
   return /^\d{8}$/.test(vs) && parseInt(vs) >= 10000000;
 }
 
 /**
- * Finds a matching incoming payment in FIO transactions.
- * Matches by: VS (no leading zeros) + exact amount + CZK + positive volume.
- * Ignores transactions with IDs in excludeTransactionIds (already processed).
+ * Hledá odpovídající příchozí platbu v seznamu FIO transakcí.
+ * Páruje podle: VS (bez leading zeros) + přesná částka + CZK + kladný objem.
+ * Ignoruje transakce s ID v excludeTransactionIds (již zpracované).
  */
 export function matchPayment(
   transactions: FioTransaction[],
@@ -194,8 +194,8 @@ export function matchPayment(
 }
 
 /**
- * Checks whether the user can perform a paid action.
- * Returns result with reason for denial.
+ * Kontroluje, zda uživatel může provést placenou akci.
+ * Vrací výsledek s důvodem zamítnutí.
  */
 export function checkEvaluationAccess(payment: PaymentRecord | null): {
   allowed: boolean;
@@ -223,7 +223,7 @@ export function checkEvaluationAccess(payment: PaymentRecord | null): {
   };
 }
 
-/** Creates or extends a payment record after successful match */
+/** Vytvoří nebo rozšíří záznam o platbě po úspěšném párování */
 export function createOrUpdatePaymentRecord(
   existing: PaymentRecord | null,
   matchedTx: NonNullable<PaymentMatchResult['transaction']>,
@@ -255,7 +255,7 @@ export function createOrUpdatePaymentRecord(
   return record;
 }
 
-/** Returns date range for FIO API query (last N days) */
+/** Vrací datumový rozsah pro dotaz na FIO API (posledních N dní) */
 export function getFioDateRange(daysBack: number = 7): { dateFrom: string; dateTo: string } {
   const now = new Date();
   const from = new Date(now.getTime() - daysBack * 86400000);
@@ -265,7 +265,7 @@ export function getFioDateRange(daysBack: number = 7): { dateFrom: string; dateT
   };
 }
 
-/** Converts event date to 6-digit variable symbol (YYMMDD) */
+/** Převede datum akce na 6místný variabilní symbol (YYMMDD) */
 export function eventDateToVS(dateString: string): string {
   const d = new Date(dateString);
   const yy = String(d.getFullYear()).slice(-2);
@@ -275,8 +275,8 @@ export function eventDateToVS(dateString: string): string {
 }
 
 /**
- * Finds ALL matching incoming payments (for donations — any amount).
- * Matches by: VS (no leading zeros) + CZK + positive volume.
+ * Hledá VŠECHNY odpovídající příchozí platby (pro dary — libovolná částka).
+ * Páruje podle: VS (bez leading zeros) + CZK + kladný objem.
  */
 export function matchDonations(
   transactions: FioTransaction[],
@@ -309,7 +309,7 @@ export function matchDonations(
   return matched;
 }
 
-/** Generates Czech QR payment string (SPD standard) */
+/** Generuje český QR platební řetězec (SPD standard) */
 export function generateSPDString(
   iban: string,
   amount: number,
@@ -322,15 +322,15 @@ export function generateSPDString(
 
 ---
 
-### File 2: Verify Payment Endpoint
+### Soubor 2: Endpoint pro ověření platby
 
-**Target path:** `{api-dir}/fio/verify-payment.ts`
+**Cílová cesta:** `{api-dir}/fio/verify-payment.ts`
 
-This is the **Cloudflare Pages Functions** version. Adapt the handler signature, request parsing, and storage calls to the detected stack.
+Toto je verze pro **Cloudflare Pages Functions**. Přizpůsob signaturu handleru, parsování requestu a volání storage detekovanému stacku.
 
 ```typescript
 // POST /api/fio/verify-payment
-// On-demand payment verification via FIO Bank API
+// On-demand ověření platby přes FIO Bank API
 
 import {
   matchPayment,
@@ -340,12 +340,12 @@ import {
   PaymentRecord,
 } from './payment-utils';
 
-// ADAPT: Import your auth/session helper
+// PŘIZPŮSOB: Importuj svůj auth/session helper
 // import { getSession } from '../auth';
 
-// ADAPT: Define your env/config interface
+// PŘIZPŮSOB: Definuj rozhraní prostředí
 interface Env {
-  WORKSHOP_DATA: KVNamespace;  // ADAPT: your storage
+  WORKSHOP_DATA: KVNamespace;  // PŘIZPŮSOB: tvůj storage
   FIO_API_TOKEN: string;
 }
 
@@ -354,36 +354,36 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
 };
 
-// ADAPT: Import from config/payment.ts
+// PŘIZPŮSOB: Importuj z config/payment.ts
 const EXPECTED_AMOUNT = 100;            // CZK
 const EVALUATIONS_PER_PURCHASE = 30;
 const FIO_RATE_LIMIT_MS = 35000;        // 35s (30s FIO limit + buffer)
 
-// ADAPT: Change handler signature to match your framework
+// PŘIZPŮSOB: Změň signaturu handleru podle svého frameworku
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   try {
-    // 1. Authentication — ADAPT to your auth system
+    // 1. Autentizace — PŘIZPŮSOB svému auth systému
     // const session = await getSession(request, env.WORKSHOP_DATA);
-    // if (!session) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: CORS_HEADERS });
+    // if (!session) return new Response(JSON.stringify({ error: 'Neautorizováno' }), { status: 401, headers: CORS_HEADERS });
 
     const body = await request.json() as { identifier?: string; variableSymbol?: string; email?: string };
     const { identifier, variableSymbol, email } = body;
 
     if (!identifier || !variableSymbol) {
       return new Response(
-        JSON.stringify({ error: 'Missing identifier or variableSymbol' }),
+        JSON.stringify({ error: 'Chybí identifier nebo variableSymbol' }),
         { status: 400, headers: CORS_HEADERS }
       );
     }
 
-    // 2. Check existing payment
+    // 2. Kontrola existující platby
     const paymentKey = `payment:${identifier}`;
-    // ADAPT: Replace with your storage read
+    // PŘIZPŮSOB: Nahraď svým čtením ze storage
     const existingPayment = await env.WORKSHOP_DATA.get(paymentKey, 'json') as PaymentRecord | null;
 
-    // If paid and limit not exhausted, return info
+    // Pokud je zaplaceno a limit nevyčerpán, vrať info
     if (existingPayment?.status === 'paid' &&
         existingPayment.evaluationsUsed < existingPayment.evaluationsLimit) {
       return new Response(JSON.stringify({
@@ -394,31 +394,31 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       }), { headers: CORS_HEADERS });
     }
 
-    // 3. Rate limit: max 1 FIO API call per 35s (global)
-    // ADAPT: Replace with your storage read
+    // 3. Rate limit: max 1 FIO API volání za 35s (globální)
+    // PŘIZPŮSOB: Nahraď svým čtením ze storage
     const lastCheck = await env.WORKSHOP_DATA.get('fio:last_check');
     const now = Date.now();
     if (lastCheck && now - parseInt(lastCheck) < FIO_RATE_LIMIT_MS) {
       const waitSec = Math.ceil((FIO_RATE_LIMIT_MS - (now - parseInt(lastCheck))) / 1000);
       return new Response(JSON.stringify({
         error: 'rate_limit',
-        message: `Payment verification available once per 30s. Try again in ${waitSec}s.`,
+        message: `Ověření je možné jednou za 30 sekund. Zkuste to za ${waitSec}s.`,
       }), { status: 429, headers: CORS_HEADERS });
     }
 
-    // 4. FIO API token check
+    // 4. Kontrola FIO API tokenu
     if (!env.FIO_API_TOKEN) {
       return new Response(JSON.stringify({
-        error: 'Payment gateway not configured.',
+        error: 'Platební brána není nakonfigurována.',
       }), { status: 503, headers: CORS_HEADERS });
     }
 
-    // 5. Call FIO API — transactions for last 7 days
+    // 5. Volání FIO API — transakce za posledních 7 dní
     const { dateFrom, dateTo } = getFioDateRange(7);
     const fioUrl = `https://fioapi.fio.cz/v1/rest/periods/${env.FIO_API_TOKEN}/${dateFrom}/${dateTo}/transactions.json`;
 
-    // Write timestamp BEFORE the call (race condition protection)
-    // ADAPT: Replace with your storage write
+    // Zapsat timestamp PŘED voláním (ochrana proti race condition)
+    // PŘIZPŮSOB: Nahraď svým zápisem do storage
     await env.WORKSHOP_DATA.put('fio:last_check', String(now));
 
     const fioResponse = await fetch(fioUrl);
@@ -426,21 +426,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (fioResponse.status === 409) {
       return new Response(JSON.stringify({
         error: 'rate_limit',
-        message: 'Bank API is temporarily overloaded. Try again in 30 seconds.',
+        message: 'Bankovní API je dočasně přetížené. Zkuste to za 30 sekund.',
       }), { status: 429, headers: CORS_HEADERS });
     }
 
     if (!fioResponse.ok) {
-      console.error('FIO API error:', fioResponse.status, await fioResponse.text());
+      console.error('FIO API chyba:', fioResponse.status, await fioResponse.text());
       return new Response(JSON.stringify({
         error: 'fio_error',
-        message: 'Could not verify payment. Please try again later.',
+        message: 'Nepodařilo se ověřit platbu. Zkuste to později.',
       }), { status: 502, headers: CORS_HEADERS });
     }
 
     const fioData = await fioResponse.json() as FioApiResponse;
 
-    // 6. Match payment
+    // 6. Párování platby
     const transactions = fioData.accountStatement?.transactionList?.transaction || [];
 
     const processedIds = new Set(
@@ -452,11 +452,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!match.found || !match.transaction) {
       return new Response(JSON.stringify({
         success: false,
-        message: 'Payment not received yet. Bank transfers may take up to a few hours. Please try again later.',
+        message: 'Platba zatím nebyla přijata. Mezibankovní převody mohou trvat až několik hodin. Zkuste to prosím později.',
       }), { headers: CORS_HEADERS });
     }
 
-    // 7. Payment found — activate/extend package
+    // 7. Platba nalezena — aktivovat/rozšířit balíček
     const updatedPayment = createOrUpdatePaymentRecord(
       existingPayment,
       match.transaction,
@@ -465,7 +465,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       EVALUATIONS_PER_PURCHASE
     );
 
-    // ADAPT: Replace with your storage write
+    // PŘIZPŮSOB: Nahraď svým zápisem do storage
     await env.WORKSHOP_DATA.put(paymentKey, JSON.stringify(updatedPayment));
 
     return new Response(JSON.stringify({
@@ -475,14 +475,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }), { headers: CORS_HEADERS });
 
   } catch (error: unknown) {
-    console.error('verify-payment error:', error);
+    console.error('verify-payment chyba:', error);
     return new Response(JSON.stringify({
-      error: 'Internal server error',
+      error: 'Interní chyba serveru',
     }), { status: 500, headers: CORS_HEADERS });
   }
 };
 
-// CORS preflight — ADAPT or remove if your framework handles CORS
+// CORS preflight — PŘIZPŮSOB nebo odstraň pokud tvůj framework řeší CORS
 export const onRequestOptions: PagesFunction = async () => {
   return new Response(null, {
     status: 204,
@@ -497,13 +497,13 @@ export const onRequestOptions: PagesFunction = async () => {
 
 ---
 
-### File 3: Verify Donation Endpoint (optional)
+### Soubor 3: Endpoint pro ověření darů (volitelný)
 
-**Target path:** `{api-dir}/fio/verify-donation.ts`
+**Cílová cesta:** `{api-dir}/fio/verify-donation.ts`
 
 ```typescript
 // POST /api/fio/verify-donation
-// Verifies voluntary donations via FIO Bank API
+// Ověření dobrovolných příspěvků přes FIO Bank API
 
 import {
   matchDonations,
@@ -512,7 +512,7 @@ import {
   DonationRecord,
 } from './payment-utils';
 
-// ADAPT: Define your env/config interface
+// PŘIZPŮSOB: Definuj rozhraní prostředí
 interface Env {
   WORKSHOP_DATA: KVNamespace;
   FIO_API_TOKEN: string;
@@ -525,7 +525,7 @@ const CORS_HEADERS = {
 
 const FIO_RATE_LIMIT_MS = 35000;
 
-// ADAPT: Change handler signature
+// PŘIZPŮSOB: Změň signaturu handleru
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
@@ -535,7 +535,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (!eventId || !variableSymbol) {
       return new Response(
-        JSON.stringify({ error: 'Missing eventId or variableSymbol' }),
+        JSON.stringify({ error: 'Chybí eventId nebo variableSymbol' }),
         { status: 400, headers: CORS_HEADERS }
       );
     }
@@ -547,21 +547,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const waitSec = Math.ceil((FIO_RATE_LIMIT_MS - (now - parseInt(lastCheck))) / 1000);
       return new Response(JSON.stringify({
         error: 'rate_limit',
-        message: `Verification available once per 30s. Try again in ${waitSec}s.`,
+        message: `Ověření je možné jednou za 30 sekund. Zkuste to za ${waitSec}s.`,
       }), { status: 429, headers: CORS_HEADERS });
     }
 
     if (!env.FIO_API_TOKEN) {
       return new Response(JSON.stringify({
-        error: 'Payment gateway not configured.',
+        error: 'Platební brána není nakonfigurována.',
       }), { status: 503, headers: CORS_HEADERS });
     }
 
-    // Load existing donation record
+    // Načtení existujícího záznamu o darech
     const donationKey = `donation:${eventId}`;
     const existing = await env.WORKSHOP_DATA.get(donationKey, 'json') as DonationRecord | null;
 
-    // Call FIO API — last 14 days
+    // Volání FIO API — posledních 14 dní
     const { dateFrom, dateTo } = getFioDateRange(14);
     const fioUrl = `https://fioapi.fio.cz/v1/rest/periods/${env.FIO_API_TOKEN}/${dateFrom}/${dateTo}/transactions.json`;
 
@@ -572,15 +572,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (fioResponse.status === 409) {
       return new Response(JSON.stringify({
         error: 'rate_limit',
-        message: 'Bank API temporarily overloaded. Try again in 30 seconds.',
+        message: 'Bankovní API je dočasně přetížené. Zkuste to za 30 sekund.',
       }), { status: 429, headers: CORS_HEADERS });
     }
 
     if (!fioResponse.ok) {
-      console.error('FIO API error:', fioResponse.status, await fioResponse.text());
+      console.error('FIO API chyba:', fioResponse.status, await fioResponse.text());
       return new Response(JSON.stringify({
         error: 'fio_error',
-        message: 'Could not verify donation. Please try again later.',
+        message: 'Nepodařilo se ověřit příspěvek. Zkuste to později.',
       }), { status: 502, headers: CORS_HEADERS });
     }
 
@@ -593,7 +593,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const newDonations = matchDonations(transactions, variableSymbol, processedIds);
 
-    // Update record
+    // Aktualizace záznamu
     const record: DonationRecord = existing || {
       variableSymbol,
       eventId,
@@ -629,9 +629,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }), { headers: CORS_HEADERS });
 
   } catch (error: unknown) {
-    console.error('verify-donation error:', error);
+    console.error('verify-donation chyba:', error);
     return new Response(JSON.stringify({
-      error: 'Internal server error',
+      error: 'Interní chyba serveru',
     }), { status: 500, headers: CORS_HEADERS });
   }
 };
@@ -650,17 +650,17 @@ export const onRequestOptions: PagesFunction = async () => {
 
 ---
 
-### File 4: Donations Admin Endpoint (optional)
+### Soubor 4: Admin endpoint pro dary (volitelný)
 
-**Target path:** `{api-dir}/fio/donations.ts`
+**Cílová cesta:** `{api-dir}/fio/donations.ts`
 
 ```typescript
-// GET /api/fio/donations?eventId=xxx or ?eventIds=id1,id2,id3
-// Admin endpoint to view donation records
+// GET /api/fio/donations?eventId=xxx nebo ?eventIds=id1,id2,id3
+// Admin endpoint pro zobrazení záznamů o darech
 
 import { DonationRecord } from './payment-utils';
 
-// ADAPT: Define your env/config interface
+// PŘIZPŮSOB: Definuj rozhraní prostředí
 interface Env {
   WORKSHOP_DATA: KVNamespace;
 }
@@ -670,7 +670,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
 };
 
-// ADAPT: Change handler signature
+// PŘIZPŮSOB: Změň signaturu handleru
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { env } = context;
   const url = new URL(context.request.url);
@@ -703,13 +703,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return new Response(JSON.stringify(results), { headers: CORS_HEADERS });
     }
 
-    return new Response(JSON.stringify({ error: 'Missing eventId or eventIds parameter' }), {
+    return new Response(JSON.stringify({ error: 'Chybí eventId nebo eventIds parametr' }), {
       status: 400,
       headers: CORS_HEADERS,
     });
   } catch (error: unknown) {
-    console.error('donations GET error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('donations GET chyba:', error);
+    return new Response(JSON.stringify({ error: 'Interní chyba serveru' }), {
       status: 500,
       headers: CORS_HEADERS,
     });
@@ -730,23 +730,23 @@ export const onRequestOptions: PagesFunction = async () => {
 
 ---
 
-### File 5: Mock Endpoint (for local development)
+### Soubor 5: Mock endpoint (pro lokální vývoj)
 
-**Target path:** `{api-dir}/fio/mock.ts`
+**Cílová cesta:** `{api-dir}/fio/mock.ts`
 
 ```typescript
 // GET /api/fio/mock?vs=XXXXXXXX&amount=100
-// Mock FIO API endpoint for local development
-// Simulates FIO API response with an incoming payment
+// Mock FIO API endpoint pro lokální vývoj
+// Simuluje odpověď FIO API s příchozí platbou
 
-// ADAPT: Define your env/config interface
+// PŘIZPŮSOB: Definuj rozhraní prostředí
 interface Env {
   WORKSHOP_DATA: KVNamespace;
 }
 
-// ADAPT: Change handler signature
+// PŘIZPŮSOB: Změň signaturu handleru
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  // Block in production — mock is for local dev only
+  // Blokovat na produkci — mock je jen pro lokální vývoj
   const url = new URL(context.request.url);
   if (url.hostname !== 'localhost' && !url.hostname.includes('127.0.0.1') && !url.hostname.includes('.local')) {
     return new Response('Not found', { status: 404 });
@@ -761,7 +761,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     'Access-Control-Allow-Origin': '*',
   };
 
-  // Simulate FIO rate limit (5s cooldown for mock)
+  // Simulace FIO rate limitu (5s cooldown pro mock)
   const lastCheck = await context.env.WORKSHOP_DATA.get('fio:mock_last_check');
   const now = Date.now();
   if (lastCheck && now - parseInt(lastCheck) < 5000) {
@@ -769,7 +769,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
   await context.env.WORKSHOP_DATA.put('fio:mock_last_check', String(now));
 
-  // Empty response (simulate: payment not received)
+  // Prázdná odpověď (simulace: platba nedorazila)
   if (empty) {
     return new Response(JSON.stringify({
       accountStatement: {
@@ -790,7 +790,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }), { headers });
   }
 
-  // Response with payment
+  // Odpověď s platbou
   const txId = Math.floor(10000000000 + Math.random() * 90000000000);
   const today = new Date().toISOString().split('T')[0];
 
@@ -813,11 +813,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           column22: { value: txId, name: 'ID pohybu', id: 22 },
           column0: { value: today + '+01:00', name: 'Datum', id: 0 },
           column1: { value: amount, name: 'Objem', id: 1 },
-          column14: { value: 'CZK', name: 'Mena', id: 14 },
-          column2: { value: '1234567890', name: 'Protiucet', id: 2 },
+          column14: { value: 'CZK', name: 'Měna', id: 14 },
+          column2: { value: '1234567890', name: 'Protiúčet', id: 2 },
           column5: { value: vs, name: 'VS', id: 5 },
-          column10: { value: 'Test Sender', name: 'Nazev protiuctu', id: 10 },
-          column16: { value: 'Test payment', name: 'Zprava pro prijemce', id: 16 },
+          column10: { value: 'Testovací plátce', name: 'Název protiúčtu', id: 10 },
+          column16: { value: 'Testovací platba', name: 'Zpráva pro příjemce', id: 16 },
         }],
       },
     },
@@ -827,53 +827,53 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
 ---
 
-### File 6: Payment Configuration
+### Soubor 6: Konfigurace plateb
 
-**Target path:** `{src}/config/payment.ts`
+**Cílová cesta:** `{src}/config/payment.ts`
 
 ```typescript
-// Payment configuration — UPDATE THESE VALUES for your project
+// Konfigurace plateb — AKTUALIZUJ TYTO HODNOTY pro svůj projekt
 
-/** Your FIO Bank IBAN */
-export const PAYMENT_IBAN = 'CZ00000000000000000000'; // TODO: Replace with your IBAN
+/** IBAN tvého FIO účtu */
+export const PAYMENT_IBAN = 'CZ00000000000000000000'; // TODO: Nahraď svým IBAN
 
-/** Account number for display */
-export const PAYMENT_ACCOUNT = '0000000000 / 2010'; // TODO: Replace with your account
+/** Číslo účtu pro zobrazení */
+export const PAYMENT_ACCOUNT = '0000000000 / 2010'; // TODO: Nahraď svým číslem účtu
 
-/** Payment amount in CZK */
-export const PAYMENT_AMOUNT = 100; // TODO: Set your price
+/** Částka platby v CZK */
+export const PAYMENT_AMOUNT = 100; // TODO: Nastav svou cenu
 
-/** Number of uses per purchase (for metered access) */
+/** Počet použití na jeden nákup (pro měřený přístup) */
 export const EVALUATIONS_PER_PURCHASE = 30;
 
-/** Message in QR payment */
-export const PAYMENT_MESSAGE = 'Payment'; // TODO: Customize
+/** Zpráva v QR platbě */
+export const PAYMENT_MESSAGE = 'Platba'; // TODO: Přizpůsob
 
-// --- Donations (optional) ---
+// --- Dobrovolné příspěvky (volitelné) ---
 
-/** Preset donation amounts */
+/** Předvolby částek pro příspěvek */
 export const DONATION_AMOUNTS = [50, 100, 200] as const;
 
-/** Default donation amount */
+/** Výchozí částka příspěvku */
 export const DONATION_DEFAULT_AMOUNT = 100;
 
-/** Donation payment message */
-export const DONATION_MESSAGE = 'Donation';
+/** Zpráva pro příjemce v QR platbě (příspěvek) */
+export const DONATION_MESSAGE = 'Dobrovolný příspěvek';
 ```
 
 ---
 
-### File 7: QR Payment React Component
+### Soubor 7: QR platební React komponenta
 
-**Target path:** `{src}/components/PaymentQRCode.tsx`
+**Cílová cesta:** `{src}/components/PaymentQRCode.tsx`
 
-Requires: `npm install qrcode.react`
+Vyžaduje: `npm install qrcode.react`
 
 ```tsx
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-// ADAPT: Import your UI components
-// shadcn/ui example:
+// PŘIZPŮSOB: Importuj své UI komponenty
+// příklad shadcn/ui:
 // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Button } from '@/components/ui/button';
 
@@ -921,21 +921,21 @@ const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
       setCopied(field);
       setTimeout(() => setCopied(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error('Kopírování selhalo:', err);
     }
   };
 
   const paymentDetails = [
-    { label: 'Account', value: PAYMENT_ACCOUNT, field: 'account' },
-    { label: 'Amount', value: `${amount.toLocaleString('cs-CZ')} CZK`, field: 'amount' },
-    { label: 'Variable symbol', value: variableSymbol, field: 'vs' },
+    { label: 'Číslo účtu', value: PAYMENT_ACCOUNT, field: 'account' },
+    { label: 'Částka', value: `${amount.toLocaleString('cs-CZ')} Kč`, field: 'amount' },
+    { label: 'Variabilní symbol', value: variableSymbol, field: 'vs' },
   ];
 
   return (
     <div style={{ maxWidth: 400, margin: '0 auto', padding: 24, border: '1px solid #e5e7eb', borderRadius: 12 }}>
-      <h3 style={{ textAlign: 'center', marginBottom: 16 }}>Bank Transfer Payment</h3>
+      <h3 style={{ textAlign: 'center', marginBottom: 16 }}>Platba bankovním převodem</h3>
 
-      {/* QR code */}
+      {/* QR kód */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
         <div style={{ padding: 16, background: '#fff', borderRadius: 8, boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)' }}>
           <QRCodeSVG value={spaydString} size={200} level="M" includeMargin={true} />
@@ -943,13 +943,13 @@ const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
       </div>
 
       <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 14, marginBottom: 16 }}>
-        Scan QR code in your banking app
+        Naskenujte QR kód v mobilní aplikaci vaší banky
       </p>
 
-      {/* Payment details */}
+      {/* Platební údaje */}
       <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
         <p style={{ textAlign: 'center', color: '#374151', fontSize: 14, fontWeight: 500, marginBottom: 12 }}>
-          Or enter details manually:
+          Nebo zadejte údaje ručně:
         </p>
         {paymentDetails.map((detail) => (
           <div
@@ -964,16 +964,16 @@ const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({
               onClick={() => copyToClipboard(detail.field === 'amount' ? amount.toString() : detail.value, detail.field)}
               style={{ padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
             >
-              {copied === detail.field ? '✓' : 'Copy'}
+              {copied === detail.field ? '✓' : 'Kopírovat'}
             </button>
           </div>
         ))}
       </div>
 
-      {/* Warning */}
+      {/* Upozornění */}
       <div style={{ padding: 12, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8, marginTop: 16 }}>
         <p style={{ fontSize: 14, color: '#854d0e', margin: 0 }}>
-          <strong>Important:</strong> Use the variable symbol shown above for correct payment matching.
+          <strong>Důležité:</strong> Pro správné přiřazení platby použijte uvedený variabilní symbol.
         </p>
       </div>
     </div>
@@ -985,13 +985,13 @@ export default PaymentQRCode;
 
 ---
 
-### File 8: Unit Tests
+### Soubor 8: Unit testy
 
-**Target path:** `{test-dir}/payment-utils.test.ts`
+**Cílová cesta:** `{test-dir}/payment-utils.test.ts`
 
 ```typescript
-// ADAPT: Import path to match your project structure
-import { describe, it, expect } from 'vitest'; // or 'jest'
+// PŘIZPŮSOB: Importní cestu podle struktury projektu
+import { describe, it, expect } from 'vitest'; // nebo 'jest'
 import {
   generateVariableSymbol,
   isValidVariableSymbol,
@@ -1004,9 +1004,9 @@ import {
   generateSPDString,
   FioTransaction,
   PaymentRecord,
-} from '../path/to/payment-utils'; // ADAPT: correct import path
+} from '../path/to/payment-utils'; // PŘIZPŮSOB: správná importní cesta
 
-// Helper: create a FIO transaction with given params
+// Helper: vytvoří FIO transakci s danými parametry
 function makeTx(overrides: {
   id?: number;
   amount?: number;
@@ -1018,14 +1018,14 @@ function makeTx(overrides: {
   return {
     column0: { value: overrides.date ?? '2026-02-06+01:00', name: 'Datum', id: 0 },
     column1: { value: overrides.amount ?? 100, name: 'Objem', id: 1 },
-    column2: { value: '1234567890', name: 'Protiucet', id: 2 },
+    column2: { value: '1234567890', name: 'Protiúčet', id: 2 },
     column5: overrides.vs !== undefined
       ? { value: overrides.vs, name: 'VS', id: 5 }
       : null,
     column10: overrides.senderName
-      ? { value: overrides.senderName, name: 'Nazev protiuctu', id: 10 }
+      ? { value: overrides.senderName, name: 'Název protiúčtu', id: 10 }
       : null,
-    column14: { value: overrides.currency ?? 'CZK', name: 'Mena', id: 14 },
+    column14: { value: overrides.currency ?? 'CZK', name: 'Měna', id: 14 },
     column16: null,
     column22: { value: overrides.id ?? 99999999, name: 'ID pohybu', id: 22 },
   };
@@ -1047,12 +1047,12 @@ function makePayment(overrides: Partial<PaymentRecord> = {}): PaymentRecord {
 // generateVariableSymbol
 // ============================================================
 describe('generateVariableSymbol', () => {
-  it('returns 8-digit string', () => {
+  it('vrací 8místný řetězec číslic', () => {
     const vs = generateVariableSymbol();
     expect(vs).toMatch(/^\d{8}$/);
   });
 
-  it('returns number >= 10000000', () => {
+  it('vrací číslo >= 10000000', () => {
     for (let i = 0; i < 100; i++) {
       const vs = generateVariableSymbol();
       expect(parseInt(vs)).toBeGreaterThanOrEqual(10000000);
@@ -1060,7 +1060,7 @@ describe('generateVariableSymbol', () => {
     }
   });
 
-  it('generates varying values', () => {
+  it('generuje různé hodnoty', () => {
     const values = new Set<string>();
     for (let i = 0; i < 20; i++) values.add(generateVariableSymbol());
     expect(values.size).toBeGreaterThan(1);
@@ -1071,26 +1071,26 @@ describe('generateVariableSymbol', () => {
 // isValidVariableSymbol
 // ============================================================
 describe('isValidVariableSymbol', () => {
-  it('accepts valid 8-digit VS', () => {
+  it('akceptuje platný 8místný VS', () => {
     expect(isValidVariableSymbol('38472916')).toBe(true);
     expect(isValidVariableSymbol('10000000')).toBe(true);
     expect(isValidVariableSymbol('99999999')).toBe(true);
   });
 
-  it('rejects too short VS', () => {
+  it('zamítá příliš krátký VS', () => {
     expect(isValidVariableSymbol('1234567')).toBe(false);
     expect(isValidVariableSymbol('')).toBe(false);
   });
 
-  it('rejects too long VS', () => {
+  it('zamítá příliš dlouhý VS', () => {
     expect(isValidVariableSymbol('123456789')).toBe(false);
   });
 
-  it('rejects non-numeric VS', () => {
+  it('zamítá nečíselný VS', () => {
     expect(isValidVariableSymbol('1234567a')).toBe(false);
   });
 
-  it('rejects VS under 10000000', () => {
+  it('zamítá VS pod 10000000', () => {
     expect(isValidVariableSymbol('00000001')).toBe(false);
     expect(isValidVariableSymbol('09999999')).toBe(false);
   });
@@ -1100,45 +1100,45 @@ describe('isValidVariableSymbol', () => {
 // matchPayment
 // ============================================================
 describe('matchPayment', () => {
-  it('finds matching transaction with exact VS and amount', () => {
+  it('najde odpovídající transakci s přesným VS a částkou', () => {
     const transactions = [makeTx({ id: 1001, vs: '38472916', amount: 100 })];
     const result = matchPayment(transactions, '38472916', 100);
     expect(result.found).toBe(true);
     expect(result.transaction?.id).toBe(1001);
   });
 
-  it('matches VS without leading zeros', () => {
+  it('páruje VS bez leading zeros', () => {
     const transactions = [makeTx({ id: 1002, vs: '0038472916', amount: 100 })];
     const result = matchPayment(transactions, '38472916', 100);
     expect(result.found).toBe(true);
   });
 
-  it('rejects wrong VS', () => {
+  it('zamítá chybný VS', () => {
     const transactions = [makeTx({ vs: '99999999', amount: 100 })];
     expect(matchPayment(transactions, '38472916', 100).found).toBe(false);
   });
 
-  it('rejects wrong amount', () => {
+  it('zamítá chybnou částku', () => {
     const transactions = [makeTx({ vs: '38472916', amount: 50 })];
     expect(matchPayment(transactions, '38472916', 100).found).toBe(false);
   });
 
-  it('rejects wrong currency', () => {
+  it('zamítá jinou měnu', () => {
     const transactions = [makeTx({ vs: '38472916', amount: 100, currency: 'EUR' })];
     expect(matchPayment(transactions, '38472916', 100).found).toBe(false);
   });
 
-  it('ignores outgoing payments', () => {
+  it('ignoruje odchozí platby', () => {
     const transactions = [makeTx({ vs: '38472916', amount: -100 })];
     expect(matchPayment(transactions, '38472916', 100).found).toBe(false);
   });
 
-  it('skips already processed transactions', () => {
+  it('přeskočí již zpracované transakce', () => {
     const transactions = [makeTx({ id: 5555, vs: '38472916', amount: 100 })];
     expect(matchPayment(transactions, '38472916', 100, new Set([5555])).found).toBe(false);
   });
 
-  it('returns empty for no transactions', () => {
+  it('vrátí prázdný výsledek bez transakcí', () => {
     expect(matchPayment([], '38472916', 100).found).toBe(false);
   });
 });
@@ -1147,19 +1147,19 @@ describe('matchPayment', () => {
 // checkEvaluationAccess
 // ============================================================
 describe('checkEvaluationAccess', () => {
-  it('denies if no payment', () => {
+  it('zamítne bez platby', () => {
     expect(checkEvaluationAccess(null).allowed).toBe(false);
   });
 
-  it('denies if pending', () => {
+  it('zamítne s pending platbou', () => {
     expect(checkEvaluationAccess(makePayment({ status: 'pending' })).allowed).toBe(false);
   });
 
-  it('allows if paid with remaining uses', () => {
+  it('povolí se zbývajícími použitími', () => {
     expect(checkEvaluationAccess(makePayment({ evaluationsUsed: 5, evaluationsLimit: 30 })).allowed).toBe(true);
   });
 
-  it('denies if limit reached', () => {
+  it('zamítne po vyčerpání limitu', () => {
     const result = checkEvaluationAccess(makePayment({ evaluationsUsed: 30, evaluationsLimit: 30 }));
     expect(result.allowed).toBe(false);
     expect(result.reason).toBe('limit_reached');
@@ -1172,14 +1172,14 @@ describe('checkEvaluationAccess', () => {
 describe('createOrUpdatePaymentRecord', () => {
   const matchedTx = { id: 1001, date: '2026-02-06', amount: 100, senderName: 'Test' };
 
-  it('creates new record', () => {
+  it('vytvoří nový záznam', () => {
     const record = createOrUpdatePaymentRecord(null, matchedTx, 'test@example.com', '38472916');
     expect(record.status).toBe('paid');
     expect(record.evaluationsLimit).toBe(30);
     expect(record.purchases).toHaveLength(1);
   });
 
-  it('extends existing record', () => {
+  it('rozšíří existující záznam', () => {
     const existing = makePayment({ evaluationsUsed: 28, evaluationsLimit: 30, purchases: [] });
     const record = createOrUpdatePaymentRecord(existing, matchedTx, 'test@example.com', '38472916');
     expect(record.evaluationsLimit).toBe(60);
@@ -1190,13 +1190,13 @@ describe('createOrUpdatePaymentRecord', () => {
 // getFioDateRange
 // ============================================================
 describe('getFioDateRange', () => {
-  it('returns YYYY-MM-DD format', () => {
+  it('vrací formát YYYY-MM-DD', () => {
     const { dateFrom, dateTo } = getFioDateRange();
     expect(dateFrom).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(dateTo).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it('dateTo is today', () => {
+  it('dateTo je dnešek', () => {
     const { dateTo } = getFioDateRange();
     expect(dateTo).toBe(new Date().toISOString().split('T')[0]);
   });
@@ -1206,12 +1206,12 @@ describe('getFioDateRange', () => {
 // generateSPDString
 // ============================================================
 describe('generateSPDString', () => {
-  it('generates valid SPD string', () => {
+  it('generuje validní SPD řetězec', () => {
     const spd = generateSPDString('CZ1720100000002900065431', 100, '38472916');
     expect(spd).toBe('SPD*1.0*ACC:CZ1720100000002900065431*AM:100.00*CC:CZK*X-VS:38472916*MSG:Platba');
   });
 
-  it('accepts custom message', () => {
+  it('akceptuje vlastní zprávu', () => {
     const spd = generateSPDString('CZ1720100000002900065431', 100, '12345678', 'Test');
     expect(spd).toContain('MSG:Test');
   });
@@ -1221,15 +1221,15 @@ describe('generateSPDString', () => {
 // eventDateToVS
 // ============================================================
 describe('eventDateToVS', () => {
-  it('converts date to YYMMDD', () => {
+  it('převede datum na YYMMDD', () => {
     expect(eventDateToVS('2026-02-15')).toBe('260215');
   });
 
-  it('pads single-digit month and day', () => {
+  it('doplní nulami jednocíselný měsíc a den', () => {
     expect(eventDateToVS('2026-01-05')).toBe('260105');
   });
 
-  it('returns 6-digit string', () => {
+  it('vrátí 6místný řetězec', () => {
     expect(eventDateToVS('2026-06-20')).toHaveLength(6);
   });
 });
@@ -1238,12 +1238,12 @@ describe('eventDateToVS', () => {
 // matchDonations
 // ============================================================
 describe('matchDonations', () => {
-  it('finds donations with matching VS', () => {
+  it('najde dary s odpovídajícím VS', () => {
     const txs = [makeTx({ vs: '260215', amount: 100, id: 1 })];
     expect(matchDonations(txs, '260215')).toHaveLength(1);
   });
 
-  it('finds multiple donations', () => {
+  it('najde více darů', () => {
     const txs = [
       makeTx({ vs: '260215', amount: 50, id: 1 }),
       makeTx({ vs: '260215', amount: 200, id: 2 }),
@@ -1252,12 +1252,12 @@ describe('matchDonations', () => {
     expect(matchDonations(txs, '260215')).toHaveLength(2);
   });
 
-  it('matches any amount', () => {
+  it('páruje libovolnou částku', () => {
     const txs = [makeTx({ vs: '260215', amount: 500, id: 1 })];
     expect(matchDonations(txs, '260215')[0].amount).toBe(500);
   });
 
-  it('excludes processed transactions', () => {
+  it('vylučuje zpracované transakce', () => {
     const txs = [
       makeTx({ vs: '260215', amount: 100, id: 1 }),
       makeTx({ vs: '260215', amount: 200, id: 2 }),
@@ -1269,58 +1269,58 @@ describe('matchDonations', () => {
 
 ---
 
-## Step 3: Install dependency
+## Krok 3: Instalace závislosti
 
-If the project uses React and the QR component is generated, install:
+Pokud projekt používá React a QR komponenta byla vygenerována, nainstaluj:
 
 ```bash
 npm install qrcode.react
 ```
 
-## Step 4: Environment variables
+## Krok 4: Environment proměnné
 
-Add `FIO_API_TOKEN` to the project's env config:
+Přidej `FIO_API_TOKEN` do konfigurace prostředí projektu:
 
-- **Cloudflare:** `.dev.vars` for local, Cloudflare Dashboard for production
+- **Cloudflare:** `.dev.vars` lokálně, Cloudflare Dashboard pro produkci
 - **Next.js:** `.env.local`
 - **Express:** `.env`
-- **Other:** `.env`
+- **Ostatní:** `.env`
 
-Also add to `.env.example` (or equivalent):
-
-```
-FIO_API_TOKEN=your_64_char_fio_api_token_here
-```
-
-## Step 5: Final checklist
-
-After generating all files, print this checklist for the user:
+Přidej také do `.env.example` (nebo ekvivalentu):
 
 ```
-✅ FIO Bank payment integration generated!
+FIO_API_TOKEN=vas_64znakovy_fio_api_token
+```
 
-Remaining manual steps:
-□ Update IBAN in config/payment.ts
-□ Update account number in config/payment.ts
-□ Set payment amount in config/payment.ts
-□ Add FIO_API_TOKEN to environment variables
-□ Run tests: npm test (or npx vitest run)
-□ Test locally with mock endpoint
-□ Set reminder to rotate FIO API token (180 days)
+## Krok 5: Závěrečný checklist
+
+Po vygenerování všech souborů vypiš uživateli tento checklist:
+
+```
+✅ Platební integrace FIO Banky vygenerována!
+
+Zbývající manuální kroky:
+□ Aktualizovat IBAN v config/payment.ts
+□ Aktualizovat číslo účtu v config/payment.ts
+□ Nastavit částku platby v config/payment.ts
+□ Přidat FIO_API_TOKEN do environment proměnných
+□ Spustit testy: npm test (nebo npx vitest run)
+□ Otestovat lokálně s mock endpointem
+□ Nastavit připomínku na rotaci FIO API tokenu (180 dní)
 
 FIO API Token:
-1. Log into https://ib.fio.cz
-2. Settings → API → Create new token (read-only)
-3. Copy the 64-character token
-4. Add as FIO_API_TOKEN env variable
+1. Přihlásit se na https://ib.fio.cz
+2. Nastavení → API → Přidat token (pouze čtení)
+3. Zkopírovat 64znakový token
+4. Přidat jako FIO_API_TOKEN env proměnnou
 ```
 
-## Important technical details
+## Důležité technické detaily
 
-- **FIO API rate limit:** Max 1 call per 30 seconds, enforced globally (not per user)
-- **FIO API URL:** `https://fioapi.fio.cz/v1/rest/periods/{token}/{dateFrom}/{dateTo}/transactions.json`
-- **Token validity:** 180 days, read-only recommended
-- **VS collision probability:** ~1:90M for 8-digit random
-- **SPD format:** Czech QR payment standard, supported by all Czech/Slovak banks
-- **Payment matching:** VS (normalized, no leading zeros) + exact amount + CZK + positive volume
-- **Donation matching:** VS + CZK + positive volume (any amount)
+- **FIO API rate limit:** Max 1 volání za 30 sekund, vynuceno globálně (ne per uživatel)
+- **FIO API URL:** `https://fioapi.fio.cz/v1/rest/periods/{token}/{datumOd}/{datumDo}/transactions.json`
+- **Platnost tokenu:** 180 dní, doporučeno read-only
+- **Pravděpodobnost kolize VS:** ~1:90M pro 8místné náhodné číslo
+- **SPD formát:** Český QR platební standard, podporovaný všemi českými/slovenskými bankami
+- **Párování platby:** VS (normalizovaný, bez leading zeros) + přesná částka + CZK + kladný objem
+- **Párování daru:** VS + CZK + kladný objem (libovolná částka)

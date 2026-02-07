@@ -1,49 +1,51 @@
-# FIO Pay Skill for Claude Code
+# FIO Pay Skill pro Claude Code
 
-> Czech bank payment integration (FIO Bank API) as a reusable [Claude Code](https://docs.anthropic.com/en/docs/claude-code) slash command. One command. Any TypeScript/React project. Zero dependencies to install manually.
+> Integrace plateb z FIO Banky jako znovupoužitelný [Claude Code](https://docs.anthropic.com/en/docs/claude-code) slash command. Jeden příkaz. Jakýkoliv TypeScript/React projekt. Žádné závislosti k ruční instalaci.
 
-Created by [Patrick Zandl](https://github.com/tangero) with [Claude Code](https://claude.com/claude-code) for the [vibecoding.cz](https://vibecoding.cz) community.
+Vytvořil [Patrick Zandl](https://github.com/tangero) spolu s [Claude Code](https://claude.com/claude-code) pro komunitu [vibecoding.cz](https://vibecoding.cz).
+
+[English version](README.en.md)
 
 ---
 
-## What it does
+## Co to umí
 
-`/fio-setup` analyzes your current project and generates a complete FIO Bank payment integration tailored to your stack:
+`/fio-setup` analyzuje váš aktuální projekt a vygeneruje kompletní platební integraci FIO Banky přizpůsobenou vašemu stacku:
 
-- **Payment verification** — match incoming bank transfers by variable symbol + amount
-- **QR code payments** — Czech SPD standard, scannable by any Czech/Slovak banking app
-- **Donation tracking** — optional module for voluntary contributions
-- **Mock endpoint** — local development without hitting the real bank API
-- **Unit tests** — 40+ test cases for all utility functions
+- **Ověření platby** — párování příchozích bankovních převodů podle variabilního symbolu + částky
+- **QR platby** — český SPD standard, čitelný jakoukoli českou/slovenskou bankovní aplikací
+- **Sledování darů** — volitelný modul pro dobrovolné příspěvky
+- **Mock endpoint** — lokální vývoj bez volání skutečného bankovního API
+- **Unit testy** — 40+ testových případů pro všechny utility funkce
 
-## Why FIO Bank?
+## Proč FIO Banka?
 
-FIO Bank offers a free, well-documented JSON API for reading account transactions. Unlike Stripe or other payment gateways, there are **zero fees** for domestic CZK transfers. The integration uses a read-only API token — your app only checks if a payment arrived, it never initiates transactions.
+FIO Banka nabízí bezplatné, dobře zdokumentované JSON API pro čtení pohybů na účtu. Na rozdíl od Stripe nebo jiných platebních bran jsou **nulové poplatky** za tuzemské CZK převody. Integrace používá read-only API token — vaše aplikace pouze kontroluje, zda platba dorazila, nikdy nezahajuje transakce.
 
-## Supported stacks
+## Podporované stacky
 
-The skill detects your project structure and adapts generated code accordingly:
+Skill detekuje strukturu vašeho projektu a přizpůsobí generovaný kód:
 
 | Backend | Frontend | Storage |
 |---------|----------|---------|
 | Cloudflare Pages Functions | React + shadcn/ui | Cloudflare KV |
-| Next.js API Routes | React + any UI lib | SQLite / Prisma |
+| Next.js API Routes | React + libovolná UI lib | SQLite / Prisma |
 | Express.js | Plain React | In-memory / Redis |
 | Hono | Vanilla HTML/JS | Filesystem |
 
 ---
 
-## Installation
+## Instalace
 
-### Option A: One-liner (recommended)
+### Varianta A: Jedním příkazem (doporučeno)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tangero/fio-pay-skill/main/install.sh | bash
 ```
 
-This downloads `fio-setup.md` into `~/.claude/commands/` and you're done.
+Stáhne `fio-setup.md` do `~/.claude/commands/` a je hotovo.
 
-### Option B: Manual install
+### Varianta B: Ruční instalace
 
 ```bash
 mkdir -p ~/.claude/commands
@@ -51,7 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/tangero/fio-pay-skill/main/fio-setu
   -o ~/.claude/commands/fio-setup.md
 ```
 
-### Option C: Git clone
+### Varianta C: Git clone
 
 ```bash
 git clone https://github.com/tangero/fio-pay-skill.git
@@ -59,15 +61,15 @@ cd fio-pay-skill
 ./install.sh
 ```
 
-### Verify installation
+### Ověření instalace
 
-After install, the file should exist at:
+Po instalaci by měl soubor existovat na:
 
 ```
 ~/.claude/commands/fio-setup.md
 ```
 
-You can verify with:
+Ověřte příkazem:
 
 ```bash
 ls -la ~/.claude/commands/fio-setup.md
@@ -75,86 +77,86 @@ ls -la ~/.claude/commands/fio-setup.md
 
 ---
 
-## Usage
+## Použití
 
-### 1. Open your project in Claude Code
+### 1. Otevřete projekt v Claude Code
 
-Navigate to any TypeScript/React project directory and start Claude Code.
+Přejděte do adresáře jakéhokoliv TypeScript/React projektu a spusťte Claude Code.
 
-### 2. Run the slash command
+### 2. Spusťte slash command
 
 ```
 /fio-setup
 ```
 
-### 3. Claude will automatically:
+### 3. Claude automaticky:
 
-1. **Detect your stack** — reads `package.json`, finds your backend framework, UI library, test framework, and storage solution
-2. **Ask your preference** — payment verification only (basic) or payment + donations (full)
-3. **Generate utility functions** — pure TypeScript functions for VS generation, payment matching, SPD QR strings, date ranges
-4. **Create API endpoints** — adapted to your backend (Cloudflare Functions / Next.js / Express / Hono)
-5. **Add QR payment component** — React component using your UI library (shadcn/ui / MUI / plain HTML)
-6. **Create config file** — with placeholder values for your IBAN, amounts, messages
-7. **Add unit tests** — 40+ test cases ready to run
-8. **Print a checklist** — remaining manual steps (IBAN, token, etc.)
+1. **Detekuje váš stack** — přečte `package.json`, najde backend framework, UI knihovnu, testovací framework a storage řešení
+2. **Zeptá se na preferenci** — pouze ověření plateb (základní) nebo platby + dary (kompletní)
+3. **Vygeneruje utility funkce** — čisté TypeScript funkce pro generování VS, párování plateb, SPD QR řetězce, datumové rozsahy
+4. **Vytvoří API endpointy** — přizpůsobené vašemu backendu (Cloudflare Functions / Next.js / Express / Hono)
+5. **Přidá QR platební komponentu** — React komponenta s vaší UI knihovnou (shadcn/ui / MUI / plain HTML)
+6. **Vytvoří konfigurační soubor** — s placeholder hodnotami pro IBAN, částky, zprávy
+7. **Přidá unit testy** — 40+ testových případů připravených ke spuštění
+8. **Vypíše checklist** — zbývající manuální kroky (IBAN, token atd.)
 
-### Generated file structure
+### Struktura generovaných souborů
 
 ```
 {api-dir}/fio/
-  payment-utils.ts       — Pure utility functions (VS generation, matching, SPD, dates)
-  verify-payment.ts      — Endpoint: verify a specific payment
-  verify-donation.ts     — Endpoint: verify voluntary donations (optional)
-  donations.ts           — Endpoint: admin donation overview (optional)
-  mock.ts                — Mock endpoint for local dev
+  payment-utils.ts       — Čisté utility funkce (generování VS, párování, SPD, datumy)
+  verify-payment.ts      — Endpoint: ověření konkrétní platby
+  verify-donation.ts     — Endpoint: ověření dobrovolných příspěvků (volitelně)
+  donations.ts           — Endpoint: admin přehled darů (volitelně)
+  mock.ts                — Mock endpoint pro lokální vývoj
 
-{src}/config/payment.ts  — Configuration (IBAN, amounts, messages)
-{src}/components/PaymentQRCode.tsx — React QR component
-{test-dir}/payment-utils.test.ts   — Unit tests
+{src}/config/payment.ts  — Konfigurace (IBAN, částky, zprávy)
+{src}/components/PaymentQRCode.tsx — React QR komponenta
+{test-dir}/payment-utils.test.ts   — Unit testy
 ```
 
 ---
 
-## Configuration
+## Konfigurace
 
-After running `/fio-setup`, you need to fill in your actual values:
+Po spuštění `/fio-setup` je potřeba vyplnit skutečné hodnoty:
 
-### 1. Payment config (`config/payment.ts`)
+### 1. Platební konfigurace (`config/payment.ts`)
 
-| Value | Description | Example |
-|-------|-------------|---------|
-| `PAYMENT_IBAN` | Your FIO Bank IBAN | `CZ1720100000002900065431` |
-| `PAYMENT_ACCOUNT` | Display format | `2900065431 / 2010` |
-| `PAYMENT_AMOUNT` | Price in CZK | `100` |
-| `PAYMENT_MESSAGE` | QR payment message | `Platba za sluzbu` |
+| Hodnota | Popis | Příklad |
+|---------|-------|---------|
+| `PAYMENT_IBAN` | Váš FIO Bank IBAN | `CZ1720100000002900065431` |
+| `PAYMENT_ACCOUNT` | Formát pro zobrazení | `2900065431 / 2010` |
+| `PAYMENT_AMOUNT` | Cena v CZK | `100` |
+| `PAYMENT_MESSAGE` | Zpráva v QR platbě | `Platba za sluzbu` |
 
 ### 2. FIO API Token
 
-The token gives your app read-only access to account transactions.
+Token dává vaší aplikaci read-only přístup k pohybům na účtu.
 
-1. Log into [FIO internetbanking](https://ib.fio.cz)
-2. Go to **Settings** (Nastaveni) → **API**
-3. Click **Create new token** (Pridat token)
-4. Select **read-only** permissions (Pohyby na uctu — pouze cteni)
-5. Copy the 64-character token
-6. Add as environment variable:
+1. Přihlaste se do [FIO internetbankingu](https://ib.fio.cz)
+2. Jděte do **Nastavení** → **API**
+3. Klikněte na **Přidat token**
+4. Vyberte oprávnění **Pohyby na účtu — pouze čtení**
+5. Zkopírujte 64znakový token
+6. Přidejte jako environment proměnnou:
 
-| Platform | Where to add |
-|----------|-------------|
-| Cloudflare | `.dev.vars` (local), Dashboard → Settings → Variables (production) |
+| Platforma | Kam přidat |
+|-----------|-----------|
+| Cloudflare | `.dev.vars` (lokálně), Dashboard → Settings → Variables (produkce) |
 | Next.js | `.env.local` |
 | Express / Hono | `.env` |
 
 ```bash
 # .env / .dev.vars / .env.local
-FIO_API_TOKEN=your_64_character_token_here
+FIO_API_TOKEN=vas_64znakovy_token
 ```
 
-**Important:** The token is valid for **180 days**. Set a calendar reminder to rotate it.
+**Důležité:** Token je platný **180 dní**. Nastavte si připomínku v kalendáři na jeho obnovení.
 
-### 3. Install QR dependency
+### 3. Instalace QR závislosti
 
-If you're using the React QR component:
+Pokud používáte React QR komponentu:
 
 ```bash
 npm install qrcode.react
@@ -162,69 +164,69 @@ npm install qrcode.react
 
 ---
 
-## How it works
+## Jak to funguje
 
-### Payment flow
+### Průběh platby
 
 ```
-1. Your app generates a unique variable symbol (8-digit random number)
-2. User sees a QR code (Czech SPD standard) with payment details
-3. User scans QR in their banking app and sends the payment
-4. User clicks "Verify payment" in your app
-5. Your backend calls FIO API (last 7 days of transactions)
-6. Matches by: VS + exact amount + CZK currency + positive volume
-7. If found → activates the paid feature
+1. Vaše aplikace vygeneruje unikátní variabilní symbol (8místné náhodné číslo)
+2. Uživatel vidí QR kód (český SPD standard) s platebními údaji
+3. Uživatel naskenuje QR v bankovní aplikaci a odešle platbu
+4. Uživatel klikne na "Ověřit platbu" ve vaší aplikaci
+5. Váš backend zavolá FIO API (pohyby za posledních 7 dní)
+6. Páruje podle: VS + přesná částka + měna CZK + kladný objem
+7. Pokud nalezeno → aktivuje placenou funkci
 ```
 
-### Technical details
+### Technické detaily
 
-| Parameter | Value |
-|-----------|-------|
-| FIO API rate limit | Max 1 call per 30 seconds (global, not per user) |
-| FIO API endpoint | `https://fioapi.fio.cz/v1/rest/periods/{token}/{from}/{to}/transactions.json` |
-| Variable symbol format | 8 digits, range 10000000–99999999 |
-| VS collision probability | ~1 in 90 million |
-| QR format | SPD (Short Payment Descriptor) — Czech standard |
-| Payment matching | VS + exact amount + CZK + incoming (positive volume) |
-| Donation matching | VS + CZK + incoming (any amount) |
+| Parametr | Hodnota |
+|----------|---------|
+| FIO API rate limit | Max 1 volání za 30 sekund (globální, ne per uživatel) |
+| FIO API endpoint | `https://fioapi.fio.cz/v1/rest/periods/{token}/{od}/{do}/transactions.json` |
+| Formát variabilního symbolu | 8 číslic, rozsah 10000000–99999999 |
+| Pravděpodobnost kolize VS | ~1 z 90 milionů |
+| Formát QR | SPD (Short Payment Descriptor) — český standard |
+| Párování platby | VS + přesná částka + CZK + příchozí (kladný objem) |
+| Párování daru | VS + CZK + příchozí (libovolná částka) |
 
 ### Rate limiting
 
-FIO Bank allows maximum 1 API call per 30 seconds. The generated code enforces a 35-second global cooldown (30s limit + 5s buffer). This is shared across all users — if user A checks at 12:00:00, user B must wait until 12:00:35.
+FIO Banka povoluje maximálně 1 API volání za 30 sekund. Generovaný kód vynucuje 35sekundový globální cooldown (30s limit + 5s buffer). Sdílený mezi všemi uživateli — pokud uživatel A ověřuje ve 12:00:00, uživatel B musí počkat do 12:00:35.
 
 ### Mock endpoint
 
-For local development, the generated `mock.ts` endpoint simulates FIO API responses:
+Pro lokální vývoj simuluje vygenerovaný `mock.ts` endpoint odpovědi FIO API:
 
 ```
-GET /api/fio/mock?vs=38472916&amount=100      → Returns matching payment
-GET /api/fio/mock?vs=38472916&empty=true       → Returns empty (no payment)
+GET /api/fio/mock?vs=38472916&amount=100      → Vrátí odpovídající platbu
+GET /api/fio/mock?vs=38472916&empty=true       → Vrátí prázdnou odpověď (žádná platba)
 ```
 
-The mock is automatically blocked on non-localhost domains.
+Mock je automaticky blokován na ne-localhost doménách.
 
 ---
 
-## Uninstall
+## Odinstalace
 
 ```bash
 rm ~/.claude/commands/fio-setup.md
 ```
 
-This only removes the Claude Code command. Any files already generated in your projects remain untouched.
+Odstraní pouze Claude Code command. Soubory již vygenerované ve vašich projektech zůstanou nedotčeny.
 
 ---
 
-## About
+## O projektu
 
-This skill was created by **[Patrick Zandl](https://github.com/tangero)** together with **[Claude Code](https://claude.com/claude-code)** (Anthropic) as a tool for the **[vibecoding.cz](https://vibecoding.cz)** community.
+Tento skill vytvořil **[Patrick Zandl](https://github.com/tangero)** spolu s **[Claude Code](https://claude.com/claude-code)** (Anthropic) jako nástroj pro komunitu **[vibecoding.cz](https://vibecoding.cz)**.
 
-The reference implementation is battle-tested in production at [zitraslavni.cz](https://www.zitraslavni.cz) — a creative writing workshop platform handling real payments and donations via FIO Bank.
+Referenční implementace je otestována v produkci na [zitraslavni.cz](https://www.zitraslavni.cz) — platformě pro workshopy tvůrčího psaní, která zpracovává reálné platby a dary přes FIO Banku.
 
-### What is vibecoding.cz?
+### Co je vibecoding.cz?
 
-[vibecoding.cz](https://vibecoding.cz) is a Czech community and Discord server focused on building software with AI coding assistants. If you're interested in vibe coding, AI-assisted development, or Claude Code tips and tricks, come join us!
+[vibecoding.cz](https://vibecoding.cz) je česká komunita a Discord server zaměřený na tvorbu softwaru s AI asistenty pro programování. Pokud vás zajímá vibe coding, vývoj s AI nebo tipy pro Claude Code, přidejte se k nám!
 
-## License
+## Licence
 
-MIT — use it however you want.
+MIT — používejte jak chcete.
