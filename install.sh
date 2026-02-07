@@ -6,7 +6,7 @@ set -e
 
 COMMANDS_DIR="$HOME/.claude/commands"
 SKILL_FILE="fio-setup.md"
-REPO_URL="https://raw.githubusercontent.com/davidzemancz/fio-pay-skill/main"
+REPO_URL="https://raw.githubusercontent.com/tangero/fio-pay-skill/main"
 
 echo "🏦 Installing FIO Pay Skill for Claude Code..."
 
