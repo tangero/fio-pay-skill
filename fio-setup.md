@@ -1,5 +1,8 @@
 # Nastavení platební integrace FIO Banky
 
+<!-- version: 1.0.0 -->
+> **Verze:** 1.0.0 (2026-02-07) | [Zkontrolovat aktualizace](https://github.com/tangero/fio-pay-skill/releases)
+
 Nastavuješ kompletní platební integraci FIO Banky v aktuálním projektu. Postupuj přesně podle těchto kroků.
 
 ## Krok 1: Analyzuj aktuální projekt

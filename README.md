@@ -1,10 +1,25 @@
 # FIO Pay Skill pro Claude Code
 
+[![Verze](https://img.shields.io/github/v/release/tangero/fio-pay-skill?label=verze)](https://github.com/tangero/fio-pay-skill/releases)
+[![Licence](https://img.shields.io/github/license/tangero/fio-pay-skill)](LICENSE)
+
 > Integrace plateb z FIO Banky jako znovupoužitelný [Claude Code](https://docs.anthropic.com/en/docs/claude-code) slash command. Jeden příkaz. Jakýkoliv TypeScript/React projekt. Žádné závislosti k ruční instalaci.
 
 Vytvořil [Patrick Zandl](https://github.com/tangero) spolu s [Claude Code](https://claude.com/claude-code) pro komunitu [vibecoding.cz](https://vibecoding.cz).
 
 [English version](README.en.md)
+
+---
+
+### Aktualizace
+
+Pro notifikace o nových verzích klikněte na GitHubu na **Watch** → **Custom** → **Releases** u [tohoto repozitáře](https://github.com/tangero/fio-pay-skill).
+
+Pro aktualizaci stačí znovu spustit instalaci:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tangero/fio-pay-skill/main/install.sh | bash
+```
 
 ---
 
