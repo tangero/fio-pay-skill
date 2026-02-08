@@ -5,7 +5,7 @@
 
 > Integrace plateb z FIO Banky jako znovupoužitelný [Claude Code](https://docs.anthropic.com/en/docs/claude-code) slash command. Jeden příkaz. Jakýkoliv TypeScript/React projekt. Žádné závislosti k ruční instalaci.
 
-Vytvořil [Patrick Zandl](https://github.com/tangero) spolu s [Claude Code](https://claude.com/claude-code) pro komunitu [vibecoding.cz](https://vibecoding.cz).
+Vytvořil [Patrick Zandl](https://github.com/tangero) spolu s [Claude Code](https://claude.com/claude-code) pro komunitu [vibecoding.cz](https://vibecoding.cz). Otestovat, jak takový kód může [fungovat v  nasazení, můžete zde](https://www.vibecoding.cz/podpora/).
 
 [English version](README.en.md)
 
